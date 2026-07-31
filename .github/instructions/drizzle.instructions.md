@@ -55,6 +55,29 @@ export async function getAllGameIds(db: Database): Promise<number[]> {
 - Map raw rows to the app-facing `Game`/`Publisher`/`Category` types in one place; don't leak Drizzle row shapes into components.
 - Keep ordering/lookup logic in `games.ts`, not in pages.
 
+## Documentation & Comments
+
+- For `db/**/*.ts` and `src/lib/*.ts`, every **exported function** must include TSDoc/JSDoc with:
+  - A concise summary of the function's responsibility
+  - `@param` for each parameter (including the injectable `db` parameter, when present)
+  - `@returns` describing the value shape and nullability/Promise semantics
+- Focus comments on intent and constraints (why a query, transform, or ordering choice exists), not line-by-line mechanics.
+- Remove or update outdated comments in the same change that alters behavior.
+
+Example:
+
+```ts
+/**
+ * Loads all game ids in title order so static route generation is deterministic.
+ * @param db - Drizzle database instance (injectable for testability).
+ * @returns A Promise resolving to sorted game ids.
+ */
+export async function getAllGameIds(db: Database): Promise<number[]> {
+  const rows = await db.select({ id: games.id }).from(games).orderBy(asc(games.title));
+  return rows.map((row) => row.id);
+}
+```
+
 ## Determinism
 
 Seed-derived values must be reproducible across builds. Derive star ratings from a stable hash of the title (`ratingFromTitle`) — **never** `Math.random()`.
@@ -66,4 +89,3 @@ Unit-test transforms directly and helpers against `createTestDatabase()`. See [`
 ## Type checking
 
 The data layer (`db/**/*.ts`, `src/lib/*.ts`) is type-checked by `npm run typecheck`, which runs the native **TypeScript 7** compiler (`tsgo`, from `@typescript/native-preview`) against `tsconfig.tsgo.json`. Keep helpers exported with explicit parameter and return types so `tsgo` can verify them. Linting is unaffected — ESLint + `typescript-eslint` still run on the classic `typescript` package.
-

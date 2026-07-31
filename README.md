@@ -110,6 +110,19 @@ The **quality-checks** skill (`.github/skills/quality-checks/SKILL.md`) wraps th
 - Diagnosing test failures (port conflicts, stale servers, flaky tests, CI divergence)
 - Validating readiness before commits, pushes, or merges
 
+## Coding standards
+
+Repository coding standards are documented in:
+
+- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for cross-cutting contribution rules
+- [`.github/instructions/`](.github/instructions/) for technology-specific standards
+
+Key expectations include:
+
+- Comments explain intent and decisions (why), not obvious mechanics (what)
+- Exported data-layer functions in `db/` and `src/lib/` include TSDoc/JSDoc with `@param` and `@returns`
+- Reusable Astro components document their `Props` contract
+
 ## License 
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) for the full terms.
