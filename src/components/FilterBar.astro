@@ -1,0 +1,64 @@
+---
+import type { Category, Publisher } from '../types/game';
+
+/**
+ * Props for FilterBar.
+ * Renders category and publisher filter controls for the games listing.
+ * All items are populated at build time; filtering happens client-side.
+ */
+interface Props {
+    /** All available categories to populate the category filter select. */
+    categories: Category[];
+    /** All available publishers to populate the publisher filter select. */
+    publishers: Publisher[];
+}
+
+const { categories, publishers } = Astro.props;
+---
+
+<div
+    class="flex flex-wrap gap-4 items-end mb-6 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50"
+    data-testid="filter-bar"
+>
+    <div class="flex flex-col gap-1.5 min-w-[180px]">
+        <label for="filter-category" class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            Category
+        </label>
+        <select
+            id="filter-category"
+            data-testid="filter-category-select"
+            class="bg-slate-700 text-slate-100 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none hover:border-slate-500 transition-colors cursor-pointer"
+        >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+                <option value={String(cat.id)}>{cat.name}</option>
+            ))}
+        </select>
+    </div>
+
+    <div class="flex flex-col gap-1.5 min-w-[180px]">
+        <label for="filter-publisher" class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            Publisher
+        </label>
+        <select
+            id="filter-publisher"
+            data-testid="filter-publisher-select"
+            class="bg-slate-700 text-slate-100 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none hover:border-slate-500 transition-colors cursor-pointer"
+        >
+            <option value="">All Publishers</option>
+            {publishers.map((pub) => (
+                <option value={String(pub.id)}>{pub.name}</option>
+            ))}
+        </select>
+    </div>
+
+    <button
+        type="button"
+        id="filter-clear"
+        data-testid="filter-clear-button"
+        class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 border border-slate-600 rounded-lg hover:bg-slate-600 hover:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors hidden"
+        aria-label="Clear all filters"
+    >
+        Clear Filters
+    </button>
+</div>
