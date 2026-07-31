@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { execFile as rawExecFile } from "node:child_process";
+import { dirname } from "node:path";
 import { promisify } from "node:util";
 import { joinSession, createCanvas } from "@github/copilot-sdk/extension";
 
@@ -26,15 +27,27 @@ function parseRepoFullName(remoteUrl) {
 }
 
 async function getRepoFullName() {
-    if (!session.workspacePath) return null;
-    try {
-        const { stdout } = await execFile("git", ["config", "--get", "remote.origin.url"], {
-            cwd: session.workspacePath,
-        });
-        return parseRepoFullName(stdout);
-    } catch {
-        return null;
+    const extensionPath = process.env.EXTENSION_PATH;
+    const extensionDir = extensionPath ? dirname(extensionPath) : null;
+    const candidates = [
+        session.workspacePath,
+        process.env.GITHUB_WORKSPACE,
+        process.cwd(),
+        extensionDir,
+    ].filter((value, index, values) => Boolean(value) && values.indexOf(value) === index);
+
+    for (const cwd of candidates) {
+        try {
+            const { stdout } = await execFile("git", ["-C", cwd, "config", "--get", "remote.origin.url"]);
+            const repoFullName = parseRepoFullName(stdout);
+            if (repoFullName) {
+                return repoFullName;
+            }
+        } catch {
+            continue;
+        }
     }
+    return null;
 }
 
 function summarizeBody(body) {
