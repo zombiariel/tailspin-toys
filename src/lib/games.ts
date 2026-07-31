@@ -1,7 +1,7 @@
 import { eq, asc } from 'drizzle-orm';
 import type { Database } from './db';
 import { games, categories, publishers } from '../../db/schema';
-import type { Game } from '../types/game';
+import type { Game, Category, Publisher } from '../types/game';
 
 const gameSelection = {
     id: games.id,
@@ -66,4 +66,30 @@ export async function getAllGameIds(db: Database): Promise<number[]> {
 export async function getGameById(db: Database, id: number): Promise<Game | null> {
     const rows = await baseGamesQuery(db).where(eq(games.id, id)).limit(1);
     return rows.length > 0 ? mapGame(rows[0]) : null;
+}
+
+/**
+ * All categories ordered by name.
+ * @param db - Drizzle database instance (injectable for testability).
+ * @returns A Promise resolving to all categories sorted alphabetically.
+ */
+export async function getAllCategories(db: Database): Promise<Category[]> {
+    const rows = await db
+        .select({ id: categories.id, name: categories.name })
+        .from(categories)
+        .orderBy(asc(categories.name));
+    return rows.map((row) => ({ id: row.id, name: row.name }));
+}
+
+/**
+ * All publishers ordered by name.
+ * @param db - Drizzle database instance (injectable for testability).
+ * @returns A Promise resolving to all publishers sorted alphabetically.
+ */
+export async function getAllPublishers(db: Database): Promise<Publisher[]> {
+    const rows = await db
+        .select({ id: publishers.id, name: publishers.name })
+        .from(publishers)
+        .orderBy(asc(publishers.name));
+    return rows.map((row) => ({ id: row.id, name: row.name }));
 }

@@ -6,6 +6,8 @@ import {
     getAllGames,
     getAllGameIds,
     getGameById,
+    getAllCategories,
+    getAllPublishers,
 } from './games';
 
 async function seedGames(db: Database, count: number): Promise<void> {
@@ -62,5 +64,65 @@ describe('games data-access helpers', () => {
     it('returns null for a non-existent game', async () => {
         await seedGames(db, 2);
         expect(await getGameById(db, 99999)).toBeNull();
+    });
+});
+
+describe('getAllCategories', () => {
+    let db: Database;
+
+    beforeEach(async () => {
+        db = await createTestDatabase();
+    });
+
+    it('returns an empty array when no categories exist', async () => {
+        const result = await getAllCategories(db);
+        expect(result).toEqual([]);
+    });
+
+    it('returns categories ordered by name', async () => {
+        // Insert in reverse alphabetical order to prove ordering is applied.
+        await db.insert(categories).values([
+            { name: 'Trivia', description: 'cat' },
+            { name: 'Adventure', description: 'cat' },
+            { name: 'Strategy', description: 'cat' },
+        ]);
+        const result = await getAllCategories(db);
+        expect(result.map((c) => c.name)).toEqual(['Adventure', 'Strategy', 'Trivia']);
+    });
+
+    it('returns categories with correct shape', async () => {
+        await db.insert(categories).values({ name: 'Puzzle', description: 'cat' });
+        const result = await getAllCategories(db);
+        expect(result[0]).toEqual({ id: expect.any(Number), name: 'Puzzle' });
+    });
+});
+
+describe('getAllPublishers', () => {
+    let db: Database;
+
+    beforeEach(async () => {
+        db = await createTestDatabase();
+    });
+
+    it('returns an empty array when no publishers exist', async () => {
+        const result = await getAllPublishers(db);
+        expect(result).toEqual([]);
+    });
+
+    it('returns publishers ordered by name', async () => {
+        // Insert in reverse alphabetical order to prove ordering is applied.
+        await db.insert(publishers).values([
+            { name: 'Zephyr Games', description: 'pub' },
+            { name: 'Alpha Studio', description: 'pub' },
+            { name: 'Moon Press', description: 'pub' },
+        ]);
+        const result = await getAllPublishers(db);
+        expect(result.map((p) => p.name)).toEqual(['Alpha Studio', 'Moon Press', 'Zephyr Games']);
+    });
+
+    it('returns publishers with correct shape', async () => {
+        await db.insert(publishers).values({ name: 'Nova Games', description: 'pub' });
+        const result = await getAllPublishers(db);
+        expect(result[0]).toEqual({ id: expect.any(Number), name: 'Nova Games' });
     });
 });
